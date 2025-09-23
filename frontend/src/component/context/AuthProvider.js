@@ -21,7 +21,7 @@ const AuthProvider = ({ children }) => {
         });
         setAuthenticated(auth);
         if (auth && keycloakAuth.token) {
-          const response = await fetch("http://localhost:8080/protected", {
+          const response = await fetch("http://localhost:8081/auth/protected", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${keycloakAuth.token}`,
