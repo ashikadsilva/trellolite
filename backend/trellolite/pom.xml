@@ -90,6 +90,12 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>one.stayfocused.spring</groupId>
+			<artifactId>dotenv-spring-boot</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

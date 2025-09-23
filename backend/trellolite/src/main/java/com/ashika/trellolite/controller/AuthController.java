@@ -37,7 +37,7 @@ public class AuthController {
         return "Hello, authenticated user!";
     }
 
-    @GetMapping("/protected")  // Add this - NOT under /auth path
+    @GetMapping("/protected")
     public String protectedEndpoint() {
         return "Hello from protected endpoint!";
     }
