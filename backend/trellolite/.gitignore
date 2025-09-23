@@ -14,10 +14,6 @@ target/
 .sts4-cache
 .env
 
-# Ignore IntelliJ IDEA project files
-.idea/
-
-
 ### IntelliJ IDEA ###
 .idea
 *.iws
