@@ -1,5 +1,31 @@
+<<<<<<< HEAD
 /target
 /node_modules
 *.env
 *.log
 application-*.properties
+=======
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Dependencies
+node_modules/
+target/
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+>>>>>>> b21d192b556ca546e5267fc75104ab1a1caf4ed2
