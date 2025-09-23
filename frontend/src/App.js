@@ -3,7 +3,7 @@ import './App.css';
 
 import React, { useContext } from "react";
 import { Button, Container, Typography, Card, CardContent } from "@mui/material";
-import { AuthContext } from './component/authentication/AuthProvider';
+import { AuthContext } from './component/context/AuthProvider';
 
 
 function App() {
