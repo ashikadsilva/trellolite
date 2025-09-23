@@ -23,7 +23,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestBody User loginRequest) {
-        // Just validate user exists, but don't return JWT
         User user = userRepo.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
