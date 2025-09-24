@@ -52,21 +52,61 @@ public class AuthController {
     }
 
     @PreAuthorize("hasRole('admin')")
-    @GetMapping("/user/profile")
-    public Map<String, Object> getUserProfile(JwtAuthenticationToken auth) {
-        Map<String, Object> profile = new LinkedHashMap<>();
-        profile.put("username", auth.getToken().getClaim("preferred_username"));
-        profile.put("email", auth.getToken().getClaim("email"));
-        return profile;
-    }
-
-    @PreAuthorize("hasRole('admin')")
     @GetMapping("/admin/dashboard")
     public Map<String, Object> getAdminDashboard(JwtAuthenticationToken jwtAuth) {
         Map<String, Object> dashboard = new LinkedHashMap<>();
         dashboard.put("username", jwtAuth.getToken().getClaim("preferred_username"));
         dashboard.put("message", "Welcome to the admin dashboard!");
         return dashboard;
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/user/profile")
+    public Map<String, Object> getUserProfile(JwtAuthenticationToken auth) {
+        Map<String, Object> profile = new LinkedHashMap<>();
+        profile.put("username", auth.getToken().getClaim("preferred_username"));
+        profile.put("lastName", auth.getToken().getClaim("family_name"));
+        profile.put("email", auth.getToken().getClaim("email"));
+        return profile;
+    }
+
+    @PutMapping("/user/profile")
+    @PreAuthorize("hasRole('admin') or hasRole('user')")
+        public Map<String, Object> updateUserProfile(@RequestBody Map<String, Object> updates, JwtAuthenticationToken jwtAuth) {
+
+        String email = jwtAuth.getToken().getClaim("email");
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+//        Update allowed fields
+        if (updates.containsKey("firstName")) {
+            user.setName((String) updates.get("firstName"));
+        } if (updates.containsKey("lastName")){
+            user.setName((String) updates.get("lastName"));
+        }
+
+        userRepo.save(user);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Profile updated successfully");
+        response.put("name", user.getName() + " " + user.getLastName());
+        response.put("email", user.getEmail());
+        return response;
+    }
+
+    @PreAuthorize("hasRole('user')")
+    @GetMapping("/user/profile-info")
+    public Map<String, Object> getUserProfileInfo(JwtAuthenticationToken auth) {
+        String email = auth.getToken().getClaim("email");
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Map<String, Object> profile = new LinkedHashMap<>();
+        profile.put("name", user.getName());
+        profile.put("name", user.getName() + " " + user.getLastName());
+        profile.put("email", user.getEmail());
+        profile.put("message", "Welcome to your profile!");
+        return profile;
     }
 }
 
