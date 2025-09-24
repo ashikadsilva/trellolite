@@ -36,22 +36,22 @@ const ProfilePage = () => {
     }, [user]);
 
     const handleUpdate = async () => {
-    try {
-        const response = await api.put("/auth/user/profile", { firstName, lastName });
-        const data = response.data;
+        try {
+            const response = await api.put("/auth/user/profile", { firstName, lastName });
+            const data = response.data;
 
-        // Split 'name' returned from backend into first and last
-        const nameParts = (data.name || "").split(" ");
-        setFirstName(nameParts[0] || "");
-        setLastName(nameParts.slice(1).join(" ") || "");
+            // Split 'name' returned from backend into first and last
+            const nameParts = (data.name || "").split(" ");
+            setFirstName(nameParts[0] || "");
+            setLastName(nameParts.slice(1).join(" ") || "");
 
-        setProfile(data); // store full response for message/email
-        setEditMode(false);
-    } catch (err) {
-        console.error("Error updating profile:", err);
-        setError(err.response?.data?.message || err.message || "Update failed");
-    }
-};
+            setProfile(data); // store full response for message/email
+            setEditMode(false);
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            setError(err.response?.data?.message || err.message || "Update failed");
+        }
+    };
 
 
     if (loading) return (
