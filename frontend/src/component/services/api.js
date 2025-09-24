@@ -1,5 +1,5 @@
 import keycloakAuth from "../keycloak/keycloakAuth";
-
+import axios from "axios";
 
 const api = axios.create({
     baseURL: process.env.REACT_APP_BACKEND_URL || "http://localhost:8081",
@@ -11,7 +11,7 @@ const api = axios.create({
 // Add request interceptor to attach token
 api.interceptors.request.use(
     async (config) => {
-        if (keycloakAuth && keycloakAuth.authenticated) {
+        if (keycloakAuth && keycloakAuth.authenticated && keycloakAuth.token) {
             try {
                 // Refresh token if needed
                 await keycloakAuth.updateToken(30); //refresh if expiring within 30s
