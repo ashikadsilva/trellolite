@@ -5,7 +5,11 @@ import com.ashika.trellolite.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -33,8 +37,8 @@ public class AuthController {
     }
 
     @GetMapping("/hello")
-    public String hello() {
-        return "Hello, authenticated user!";
+    public Map<String, Object> hello() {
+        return Map.of("message","Hello, authenticated user!");
     }
 
     @GetMapping("/protected")
@@ -47,16 +51,22 @@ public class AuthController {
         return "Hello, anyone can access this!";
     }
 
-    @PreAuthorize("hasRole('user')")
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/user/profile")
-    public String userProfile() {
-        return "Hello, user! This is your profile.";
+    public Map<String, Object> getUserProfile(JwtAuthenticationToken auth) {
+        Map<String, Object> profile = new LinkedHashMap<>();
+        profile.put("username", auth.getToken().getClaim("preferred_username"));
+        profile.put("email", auth.getToken().getClaim("email"));
+        return profile;
     }
 
     @PreAuthorize("hasRole('admin')")
     @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
-        return "Welcome, admin! This is the dashboard.";
+    public Map<String, Object> getAdminDashboard(JwtAuthenticationToken jwtAuth) {
+        Map<String, Object> dashboard = new LinkedHashMap<>();
+        dashboard.put("username", jwtAuth.getToken().getClaim("preferred_username"));
+        dashboard.put("message", "Welcome to the admin dashboard!");
+        return dashboard;
     }
 }
 
