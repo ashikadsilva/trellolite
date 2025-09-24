@@ -3,6 +3,7 @@ package com.ashika.trellolite.controller;
 import com.ashika.trellolite.entity.User;
 import com.ashika.trellolite.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,23 @@ public class AuthController {
     @GetMapping("/protected")
     public String protectedEndpoint() {
         return "Hello from protected endpoint!";
+    }
+
+    @GetMapping("/public/hello")
+    public String publicHello() {
+        return "Hello, anyone can access this!";
+    }
+
+    @PreAuthorize("hasRole('user')")
+    @GetMapping("/user/profile")
+    public String userProfile() {
+        return "Hello, user! This is your profile.";
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard() {
+        return "Welcome, admin! This is the dashboard.";
     }
 }
 
