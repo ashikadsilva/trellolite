@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Container, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Container, Typography, Card, CardContent, CircularProgress, Alert, TextField, Button } from '@mui/material';
 import { AuthContext } from '../context/AuthProvider';
 import api from '../services/api';
 
@@ -7,28 +7,23 @@ const ProfilePage = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [editMode, setEditMode] = useState(false);
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const { user } = useContext(AuthContext);
-
     const effectRan = useRef(false);
 
     useEffect(() => {
-        if (effectRan.current)
-            return;
+        if (effectRan.current) return;
         effectRan.current = true;
 
         const fetchProfile = async () => {
             try {
-                // Try different endpoints based on user roles
-                let endpoint = "/auth/hello"; // default endpoint
-
-                if (user?.roles?.includes('admin')) {
-                    endpoint = "/auth/admin/dashboard";
-                } else if (user?.roles?.includes('user')) {
-                    endpoint = "/auth/user/profile";
-                }
-
-                const response = await api.get(endpoint);
+                const response = await api.get("/auth/user/profile");
                 setProfile(response.data);
+                setFirstName(response.data.username || '');
+                setLastName(response.data.lastName || '');
+
             } catch (err) {
                 console.error("Error fetching profile:", err);
                 setError(err.response?.data?.message || err.message || "Failed to fetch profile");
@@ -40,38 +35,71 @@ const ProfilePage = () => {
         fetchProfile();
     }, [user]);
 
-    if (loading) {
-        return (
-            <Container sx={{ mt: 4, textAlign: 'center' }}>
-                <CircularProgress />
-                <Typography sx={{ mt: 2 }}>Loading profile...</Typography>
-            </Container>
-        );
-    }
+    const handleUpdate = async () => {
+    try {
+        const response = await api.put("/auth/user/profile", { firstName, lastName });
+        const data = response.data;
 
-    if (error) {
-        return (
-            <Container sx={{ mt: 4 }}>
-                <Alert severity="error">
-                    <strong>Error:</strong> {error}
-                </Alert>
-            </Container>
-        );
+        // Split 'name' returned from backend into first and last
+        const nameParts = (data.name || "").split(" ");
+        setFirstName(nameParts[0] || "");
+        setLastName(nameParts.slice(1).join(" ") || "");
+
+        setProfile(data); // store full response for message/email
+        setEditMode(false);
+    } catch (err) {
+        console.error("Error updating profile:", err);
+        setError(err.response?.data?.message || err.message || "Update failed");
     }
+};
+
+
+    if (loading) return (
+        <Container sx={{ mt: 4, textAlign: 'center' }}>
+            <CircularProgress />
+            <Typography sx={{ mt: 2 }}>Loading profile...</Typography>
+        </Container>
+    );
+
+    if (error) return (
+        <Container sx={{ mt: 4 }}>
+            <Alert severity="error">{error}</Alert>
+        </Container>
+    );
 
     return (
         <Container sx={{ mt: 4 }}>
             <Typography variant="h4" gutterBottom>User Profile</Typography>
-
             <Card>
                 <CardContent>
-                    <Typography variant="h6">Profile Information</Typography>
-                    <Typography><strong>Name:</strong> {profile?.name || 'N/A'}</Typography>
-                    <Typography><strong>Email:</strong> {profile?.email || 'N/A'}</Typography>
-                    {profile?.message && (
-                        <Typography sx={{ mt: 2 }}>
-                            <strong>User Message:</strong> {profile.message}
-                        </Typography>
+                    {editMode ? (
+                        <>
+                            <TextField
+                                label="First Name"
+                                value={firstName}
+                                onChange={e => setFirstName(e.target.value)}
+                                fullWidth
+                                sx={{ mb: 2 }}
+                            />
+                            <TextField
+                                label="Last Name"
+                                value={lastName}
+                                onChange={e => setLastName(e.target.value)}
+                                fullWidth
+                                sx={{ mb: 2 }}
+                            />
+                            <Button variant="contained" onClick={handleUpdate} sx={{ mr: 1 }}>Save</Button>
+                            <Button variant="outlined" onClick={() => setEditMode(false)}>Cancel</Button>
+                        </>
+                    ) : (
+                        <>
+                            <Typography><strong>Name:</strong> {firstName}</Typography>
+                            <Typography><strong>Last Name:</strong> {lastName}</Typography>
+                            <Typography><strong>Email:</strong> {profile.email}</Typography>
+                            {profile.message && <Typography sx={{ mt: 2 }}><strong>Message:</strong> {profile.message}</Typography>}
+
+                            <Button variant="contained" sx={{ mt: 2 }} onClick={() => setEditMode(true)}>Edit Profile</Button>
+                        </>
                     )}
                 </CardContent>
             </Card>
