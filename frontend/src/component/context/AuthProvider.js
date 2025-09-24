@@ -7,6 +7,7 @@ export const AuthContext = React.createContext();
 const AuthProvider = ({ children }) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const isInitializing = useRef(false);
 
   useEffect(() => {
@@ -14,23 +15,34 @@ const AuthProvider = ({ children }) => {
       if (isInitializing.current) return;
       
       isInitializing.current = true;
+
       try {
         const auth = await keycloakAuth.init({
           onLoad: "login-required",
           silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
         });
+
         setAuthenticated(auth);
+
         if (auth && keycloakAuth.token) {
-          const response = await fetch("http://localhost:8081/auth/protected", {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${keycloakAuth.token}`,
-            },
+          // Decode user info
+          const tokenParsed = keycloakAuth.tokenParsed;
+          setUser({
+            name: tokenParsed?.name,
+            email: tokenParsed?.email,
+            roles: tokenParsed?.realm_access?.roles || [],
           });
-          const data = await response.json();
-          console.log(data);
+
+          // Token refresh interval
+          const interval = setInterval(async () => {
+            const refreshed = await keycloakAuth.updateToken(30)  // refresh if less than 30s left
+            if(refreshed)
+              console.log("Token refreshed", keycloakAuth.tokenParsed);
+          }, 20 * 1000); //check every 20s
+
+          return() => clearInterval(interval);
         }
-      } catch (error) {
+      }catch (error){
         console.error("Keycloak init error:", error);
         isInitializing.current = false;
       } finally {
@@ -41,7 +53,7 @@ const AuthProvider = ({ children }) => {
     initKeycloak();
   }, []);
 
-  if (isLoading) {
+  if(isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
@@ -50,7 +62,7 @@ const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ keycloakAuth, authenticated }}>
+    <AuthContext.Provider value={{ keycloakAuth, authenticated, user }}>
       {children}
     </AuthContext.Provider>
   );
