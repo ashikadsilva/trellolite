@@ -50,9 +50,12 @@ const AdminPage = () => {
           <Typography variant="h6">Welcome, Admin!</Typography>
           <Typography>Only users with the 'admin' role can see this page.</Typography>
           {adminData && (
-            <Typography sx={{ mt: 2 }}>
-              <strong>Response:</strong> {adminData}
-            </Typography>
+            <Card sx= {{ mt:2 }}>
+                <CardContent>
+                <Typography><strong>User:</strong> {adminData?.adminUser}</Typography>
+                 <Typography><strong>Message:</strong> {adminData.message}</Typography>
+            </CardContent>
+            </Card>
           )}
         </CardContent>
       </Card>
