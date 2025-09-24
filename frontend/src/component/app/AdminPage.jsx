@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Card, CardContent, Alert, Button, CircularProgress } from '@mui/material';
 import api from '../services/api';
 
@@ -6,8 +6,11 @@ const AdminPage = () => {
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const effectRan = useRef(false)
 
   useEffect(() => {
+    if (effectRan.current) return; // skip second StrictMode run
+    effectRan.current = true;
     const fetchAdminData = async () => {
       try {
         const response = await api.get("/auth/admin/dashboard");
@@ -48,7 +51,7 @@ const AdminPage = () => {
           <Typography>Only users with the 'admin' role can see this page.</Typography>
           {adminData && (
             <Typography sx={{ mt: 2 }}>
-              <strong>Backend Response:</strong> {adminData}
+              <strong>Response:</strong> {adminData}
             </Typography>
           )}
         </CardContent>

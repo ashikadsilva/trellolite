@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useContext } from "react";
-import { Button, Container, Typography, Card, CardContent, Box, Chip } from "@mui/material";
+import { Button, Container, Typography, Card, CardContent, Box } from "@mui/material";
 import { AuthContext } from './component/context/AuthProvider';
 
 
@@ -61,33 +61,29 @@ function App() {
           variant="contained"
           color="primary"
           onClick={testBackendConnection}
-          sx={{ mr: 2 }}
-        >
-          Test Backend Connection
+          sx={{ mr: 2 }}>
+          Test Connection
         </Button>
 
         <Button
           variant="outlined"
           onClick={() => window.location.href = '/admin'}
           disabled={!user?.roles?.includes('admin')}
-          sx={{ mr: 2 }}
-        >
+          sx={{ mr: 2 }}>
           Admin Dashboard
         </Button>
 
         <Button
           variant="outlined"
           onClick={() => window.location.href = '/profile'}
-          sx={{ mr: 2 }}
-        >
+          sx={{ mr: 2 }}>
           Profile
         </Button>
 
         <Button
           variant="contained"
           color="secondary"
-          onClick={handleLogout}
-        >
+          onClick={handleLogout}>
           Logout
         </Button>
       </Box>

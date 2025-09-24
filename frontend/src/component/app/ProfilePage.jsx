@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Container, Typography, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import { AuthContext } from '../context/AuthProvider';
 import api from '../services/api';
@@ -8,8 +8,13 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
+  const effectRan = useRef(false);
 
   useEffect(() => {
+    if(effectRan.current) 
+        return;
+    effectRan.current = true;
+
     const fetchProfile = async () => {
       try {
         // Try different endpoints based on user roles
@@ -67,10 +72,9 @@ const ProfilePage = () => {
           <Typography variant="h6">Profile Information</Typography>
           <Typography><strong>Name:</strong> {profile?.name || 'N/A'}</Typography>
           <Typography><strong>Email:</strong> {profile?.email || 'N/A'}</Typography>
-          <Typography><strong>Roles:</strong> {profile?.roles?.join(', ') || 'N/A'}</Typography>
           {profile?.message && (
             <Typography sx={{ mt: 2 }}>
-              <strong>Backend Message:</strong> {profile.message}
+              <strong>User Message:</strong> {profile.message}
             </Typography>
           )}
         </CardContent>
