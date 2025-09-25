@@ -95,6 +95,18 @@
 			<artifactId>dotenv-spring-boot</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+
+		<!-- Add inside <dependencies> -->
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>21.1.1</version> <!-- pick a version compatible with your Keycloak -->
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>6.2.12.Final</version>
+		</dependency>
 	</dependencies>
 
 	<build>
