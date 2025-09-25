@@ -8,6 +8,7 @@ const ProfilePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editMode, setEditMode] = useState(false);
+    const [fullName, setFullName] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const { user } = useContext(AuthContext);
@@ -19,9 +20,10 @@ const ProfilePage = () => {
 
         const fetchProfile = async () => {
             try {
-                const response = await api.get("/auth/user/profile");
+                const response = await api.get("/auth/user/profile-info");
                 setProfile(response.data);
-                setFirstName(response.data.username || '');
+                setFullName(response.data.fullName || '');
+                setFirstName(response.data.firstName || '');
                 setLastName(response.data.lastName || '');
 
             } catch (err) {
@@ -37,16 +39,25 @@ const ProfilePage = () => {
 
     const handleUpdate = async () => {
         try {
-            const response = await api.put("/auth/user/profile", { firstName, lastName });
+            const response = await api.put("/auth/user/profile", { firstName, lastName, fullName });
             const data = response.data;
 
-            // Split 'name' returned from backend into first and last
-            const nameParts = (data.name || "").split(" ");
-            setFirstName(nameParts[0] || "");
-            setLastName(nameParts.slice(1).join(" ") || "");
+            // Split 'firstName' returned from backend into first and last
+            // const nameParts = (data.firstName || "").split(" ");
+            // setFirstName(nameParts[0] || "");
+            // setLastName(nameParts.slice(1).join(" ") || "");
 
+            setFirstName(data.firstName || "");
+            setLastName(data.lastName || "");
             setProfile(data); // store full response for message/email
             setEditMode(false);
+
+            // update global auth context so Home/Admin pages also show new name
+            // if( typeof refreshProfile === "function"){
+            //     await refreshProfile();
+            // } else if( typeof setUser === "function" ){
+            //     setUser(prev => ({...prev, firstName: `${data.firstName} ${data.lastName}`}));
+            // }
         } catch (err) {
             console.error("Error updating profile:", err);
             setError(err.response?.data?.message || err.message || "Update failed");
@@ -88,12 +99,20 @@ const ProfilePage = () => {
                                 fullWidth
                                 sx={{ mb: 2 }}
                             />
+                            <TextField
+                                label="Full Name"
+                                value={fullName}
+                                onChange={e => setFullName(e.target.value)}
+                                fullWidth
+                                sx={{ mb: 2 }}
+                            />
                             <Button variant="contained" onClick={handleUpdate} sx={{ mr: 1 }}>Save</Button>
                             <Button variant="outlined" onClick={() => setEditMode(false)}>Cancel</Button>
                         </>
                     ) : (
                         <>
-                            <Typography><strong>Name:</strong> {firstName}</Typography>
+                            <Typography><strong>Full Name:</strong>{fullName}</Typography>
+                            <Typography><strong>First Name:</strong> {firstName}</Typography>
                             <Typography><strong>Last Name:</strong> {lastName}</Typography>
                             <Typography><strong>Email:</strong> {profile.email}</Typography>
                             {profile.message && <Typography sx={{ mt: 2 }}><strong>Message:</strong> {profile.message}</Typography>}

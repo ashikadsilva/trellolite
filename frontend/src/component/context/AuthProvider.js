@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, createContext } from "react";
 import { CircularProgress, Box } from "@mui/material";
 import keycloakAuth from "../keycloak/keycloakAuth";
+import api from "../services/api";
 
 export const AuthContext = createContext();
 
@@ -9,6 +10,20 @@ const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const isInitializing = useRef(false);
+
+  const refreshProfile = async () =>{
+    try{
+      const response = await api.get("/auth/user/profile-info");
+      setUser(prev => ({
+        ...prev,
+        firstName:response.data.firstName || prev?.name,
+        lastName:response.data.lastName || prev?.lastName,
+        email: response.data.email || prev?.email,
+      }))
+    } catch (err) {
+      console.error("Failed to refresh profile", err)
+    }
+  }
 
   useEffect(() => {
     const initKeycloak = async () => {
@@ -33,6 +48,9 @@ const AuthProvider = ({ children }) => {
             email: tokenParsed?.email,
             roles: tokenParsed?.realm_access?.roles || [],
           });
+
+          // merge DB values(authoritative)
+          await refreshProfile();
 
           // Token refresh interval
           const interval = setInterval(async () => {
@@ -68,7 +86,7 @@ const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ keycloakAuth, authenticated, user }}>
+    <AuthContext.Provider value={{ keycloakAuth, authenticated, user, setUser, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
