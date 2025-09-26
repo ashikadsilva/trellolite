@@ -42,22 +42,10 @@ const ProfilePage = () => {
             const response = await api.put("/auth/user/profile", { firstName, lastName, fullName });
             const data = response.data;
 
-            // Split 'firstName' returned from backend into first and last
-            // const nameParts = (data.firstName || "").split(" ");
-            // setFirstName(nameParts[0] || "");
-            // setLastName(nameParts.slice(1).join(" ") || "");
-
             setFirstName(data.firstName || "");
             setLastName(data.lastName || "");
             setProfile(data); // store full response for message/email
             setEditMode(false);
-
-            // update global auth context so Home/Admin pages also show new name
-            // if( typeof refreshProfile === "function"){
-            //     await refreshProfile();
-            // } else if( typeof setUser === "function" ){
-            //     setUser(prev => ({...prev, firstName: `${data.firstName} ${data.lastName}`}));
-            // }
         } catch (err) {
             console.error("Error updating profile:", err);
             setError(err.response?.data?.message || err.message || "Update failed");
