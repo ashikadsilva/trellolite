@@ -11,5 +11,5 @@
 cd backend
 
 
-![Trellolite FlowDiagram](images/flow-diagram.png)
+[![Trellolite FlowDiagram](images/flow-diagram.png)](https://github.com/ashikadsilva/trellolite/blob/main/images/flow-diagram.png)
 
