@@ -12,3 +12,4 @@ cd backend
 
 
 ![Trellolite FlowDiagram](images/flow-diagram.png)
+
