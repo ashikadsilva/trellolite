@@ -11,36 +11,35 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const isInitializing = useRef(false);
 
-  const refreshProfile = async () =>{
-    try{
+  const refreshProfile = async () => {
+    try {
       const response = await api.get("/auth/user/profile-info");
       setUser(prev => ({
         ...prev,
-        firstName:response.data.firstName || prev?.name,
-        lastName:response.data.lastName || prev?.lastName,
-        email: response.data.email || prev?.email,
-      }))
+        ...response.data,
+      }));
     } catch (err) {
-      console.error("Failed to refresh profile", err)
+      console.error("Failed to refresh profile", err);
     }
-  }
+  };
+
+  const hasRole = (role) => user?.roles?.includes(role);
 
   useEffect(() => {
     const initKeycloak = async () => {
       if (isInitializing.current) return;
-
       isInitializing.current = true;
 
       try {
         const auth = await keycloakAuth.init({
           onLoad: "login-required",
-          silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-          checkLoginIframe: false //Disable iframe check for simpler setup
+          silentCheckSsoRedirectUri: window.location.origin + "/silent-check-sso.html",
+          checkLoginIframe: false, // disable iframe check for simpler setup
         });
+
         setAuthenticated(auth);
 
         if (auth && keycloakAuth.tokenParsed) {
-          // Decode user info
           const tokenParsed = keycloakAuth.tokenParsed;
           setUser({
             id: tokenParsed?.sub,
@@ -49,20 +48,20 @@ const AuthProvider = ({ children }) => {
             roles: tokenParsed?.realm_access?.roles || [],
           });
 
-          // merge DB values(authoritative)
+          // Merge DB values (authoritative)
           await refreshProfile();
 
-          // Token refresh interval
+          // Auto-refresh token
           const interval = setInterval(async () => {
             try {
-              await keycloakAuth.updateToken(30); // refresh if less than 30s left
+              await keycloakAuth.updateToken(30);
             } catch (error) {
               console.error("Failed to refresh token:", error);
               keycloakAuth.logout();
             }
-          }, 20 * 1000); // check every 20s
+          }, 20 * 1000);
 
-          // Cleanup function
+          // Cleanup
           return () => clearInterval(interval);
         }
       } catch (error) {
@@ -70,7 +69,6 @@ const AuthProvider = ({ children }) => {
         setAuthenticated(false);
       } finally {
         setIsLoading(false);
-        // isInitializing.current = false;
       }
     };
 
@@ -86,7 +84,7 @@ const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ keycloakAuth, authenticated, user, setUser, refreshProfile }}>
+    <AuthContext.Provider value={{ user, authenticated, refreshProfile, hasRole, keycloakAuth }}>
       {children}
     </AuthContext.Provider>
   );
