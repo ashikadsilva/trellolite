@@ -1,7 +1,11 @@
 package com.ashika.trellolite.controller;
 
 import com.ashika.trellolite.entity.User;
+import com.ashika.trellolite.models.UserVo;
 import com.ashika.trellolite.repository.UserRepository;
+import com.ashika.trellolite.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,27 +18,21 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin("*")
-public class AuthController {
+@RequiredArgsConstructor
+public class    AuthController {
 
-    @Autowired private UserRepository userRepo;
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private UserRepository userRepo;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        user.setFullName(user.getFirstName() + " " + user.getLastName());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepo.save(user);
-        return "User registered successfully!";
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestBody User loginRequest) {
-        User user = userRepo.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-        return "Login successful! Use Keycloak for authentication.";
+    public UserVo register(@RequestBody @Valid UserVo user, @RequestParam String rawPassword) {
+        return userService.registerUser(user, rawPassword);
     }
 
     @GetMapping("/hello")
@@ -52,7 +50,7 @@ public class AuthController {
         return "Hello, anyone can access this!";
     }
 
-    @PreAuthorize("hasRole('user') or hasRole('admin')")
+    @PreAuthorize(" hasRole('ADMIN')")
     @GetMapping("/admin/dashboard")
     public Map<String, Object> getAdminDashboard(JwtAuthenticationToken jwtAuth) {
         Map<String, Object> dashboard = new LinkedHashMap<>();
@@ -61,7 +59,7 @@ public class AuthController {
         return dashboard;
     }
 
-    @PreAuthorize("hasRole('user') or hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/profile")
     public Map<String, Object> getUserProfile(JwtAuthenticationToken auth) {
         Map<String, Object> profile = new LinkedHashMap<>();
@@ -72,47 +70,18 @@ public class AuthController {
     }
 
     @PutMapping("/user/profile")
-    @PreAuthorize("hasRole('user') or hasRole('admin')")
-        public Map<String, Object> updateUserProfile(@RequestBody Map<String, Object> updates, JwtAuthenticationToken jwtAuth) {
+    @PreAuthorize("hasRole('ADMIN')")
+        public UserVo updateUserProfile(@RequestBody UserVo updates, JwtAuthenticationToken jwtAuth) {
 
         String email = jwtAuth.getToken().getClaim("email");
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-//        Update allowed fields
-        if (updates.containsKey("firstName")) {
-            user.setFirstName((String) updates.get("firstName"));
-        } if (updates.containsKey("lastName")){
-            user.setLastName((String) updates.get("lastName"));
-        } if (updates.containsKey("fullName")){
-            user.setFullName((String) updates.get("fullName"));
-        }
-
-        userRepo.save(user);
-
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", "Profile updated successfully");
-        response.put("firstName", user.getFirstName());
-        response.put("lastName", user.getLastName());
-        response.put("fullName", user.getFullName());
-        response.put("email", user.getEmail());
-        return response;
+        return userService.updateUserProfile(email, updates);
     }
 
-    @PreAuthorize("hasRole('user') or hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/profile-info")
-    public Map<String, Object> getUserProfileInfo(JwtAuthenticationToken auth) {
+    public UserVo getUserProfileInfo(JwtAuthenticationToken auth) {
         String email = auth.getToken().getClaim("email");
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Map<String, Object> profile = new LinkedHashMap<>();
-        profile.put("firstName", user.getFirstName());
-        profile.put("lastName", user.getLastName());
-        profile.put("fullName", user.getFullName());
-        profile.put("email", user.getEmail());
-        profile.put("message", "Welcome to your profile!");
-        return profile;
+        return userService.getUserByEmail(email);
     }
 }
 
