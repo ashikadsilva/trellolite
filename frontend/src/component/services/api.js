@@ -10,19 +10,17 @@ const api = axios.create({
 
 // Add request interceptor to attach token
 api.interceptors.request.use(
-    async (config) => {
-        if (keycloakAuth && keycloakAuth.authenticated && keycloakAuth.token) {
+    api.interceptors.request.use(async (config) => {
+        if(keycloakAuth?.authenticated) {
             try {
-                // Refresh token if needed
-                await keycloakAuth.updateToken(30); //refresh if expiring within 30s
+                await keycloakAuth.updateToken(30);
                 config.headers.Authorization = `Bearer ${keycloakAuth.token}`;
-            } catch (err) {
-                console.error("Failed to refresh token:", err);
-                keycloakAuth.logout();
+            } catch {
+                keycloakAuth.logout({ redirectUri: window.location.origin });
             }
         }
         return config;
-    },
+    }),
     (error) => Promise.reject(error)
 );
 
