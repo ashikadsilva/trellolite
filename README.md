@@ -9,3 +9,6 @@
 ### Backend
 ```bash
 cd backend
+
+
+![Trellolite FlowDiagram](images/flow-diagram.png)
