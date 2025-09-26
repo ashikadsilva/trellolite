@@ -15,11 +15,10 @@ function App() {
     );
   }
 
-  const handleLogout = () => {
-    keycloakAuth.logout({
-      redirectUri: window.location.origin
-    });
-  };
+const handleLogout = () => {
+  if (!keycloakAuth) return;
+  keycloakAuth.logout();
+};
 
   const testBackendConnection = async () => {
     try {
@@ -51,7 +50,7 @@ function App() {
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Typography variant="h6">User Information</Typography>
-          <Typography><strong>Name:</strong> {user?.name}</Typography>
+          <Typography><strong>Name:</strong> {user?.username}</Typography>
           <Typography><strong>Email:</strong> {user?.email}</Typography>
         </CardContent>
       </Card>

@@ -52,7 +52,7 @@ const AdminPage = () => {
           {adminData && (
             <Card sx= {{ mt:2 }}>
                 <CardContent>
-                <Typography><strong>User:</strong> {adminData?.adminUser}</Typography>
+                <Typography><strong>User:</strong> {adminData?.username}</Typography>
                  <Typography><strong>Message:</strong> {adminData.message}</Typography>
             </CardContent>
             </Card>
