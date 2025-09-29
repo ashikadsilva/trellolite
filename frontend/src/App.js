@@ -19,6 +19,9 @@ function App() {
   }
 
 const handleLogout = () => {
+  if (!keycloakAuth) return;
+  keycloakAuth.logout();
+=======
   showToast.info('Logging out...');
   setTimeout (() => {
     keycloakAuth.logout({
@@ -59,6 +62,31 @@ const handleLogout = () => {
         🚀 Welcome, {user?.name || "User"}!
       </Typography>
 
+      <Card sx={{ mb: 2 }}>
+        <CardContent>
+          <Typography variant="h6">User Information</Typography>
+          <Typography><strong>Name:</strong> {user?.username}</Typography>
+          <Typography><strong>Email:</strong> {user?.email}</Typography>
+        </CardContent>
+      </Card>
+
+      <Box sx={{ mb: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={testBackendConnection}
+          sx={{ mr: 2 }}>
+          Test Connection
+        </Button>
+
+        <Button
+          variant="outlined"
+          onClick={() => window.location.href = '/admin'}
+          disabled={!user?.roles?.includes('admin')}
+          sx={{ mr: 2 }}>
+          Admin Dashboard
+        </Button>
+=======
       <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Card>

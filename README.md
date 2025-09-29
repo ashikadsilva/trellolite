@@ -11,6 +11,8 @@
 cd backend
 
 
+![Trellolite FlowDiagram](https://github.com/ashikadsilva/trellolite/raw/main/images/flow-diagram.png)
+
 User (Browser)
   │
   │ Visit React App
@@ -48,7 +50,4 @@ Response JSON
 User sees personalized data
 
 ![Trellolite FlowDiagram](images/flow-diagram.png)
-
-
-
 
