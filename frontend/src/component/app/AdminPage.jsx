@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Card, CardContent, Alert, Button, CircularProgress } from '@mui/material';
 import api from '../services/api';
+import { getErrorMessage, showToast } from '../../utils/toast';
 
 const AdminPage = () => {
   const [adminData, setAdminData] = useState(null);
@@ -11,13 +12,17 @@ const AdminPage = () => {
   useEffect(() => {
     if (effectRan.current) return; // skip second StrictMode run
     effectRan.current = true;
+
     const fetchAdminData = async () => {
       try {
         const response = await api.get("/auth/admin/dashboard");
         setAdminData(response.data);
+        showToast.success('Admin Dashboard loaded!');
       } catch (err) {
         console.error("Error fetching admin data:", err);
-        setError(err.response?.data?.message || "Failed to fetch admin data");
+        const errorMsg = getErrorMessage(err);
+        setError(errorMsg);
+        showToast.error(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -54,13 +59,14 @@ const AdminPage = () => {
                 <CardContent>
                 <Typography><strong>User:</strong> {adminData?.username}</Typography>
                  <Typography><strong>Message:</strong> {adminData.message}</Typography>
+                <Typography><strong>Message:</strong> {adminData.message}</Typography>
             </CardContent>
             </Card>
           )}
         </CardContent>
       </Card>
 
-      <Button variant="contained" onClick={() => window.location.href = '/'}>
+      <Button variant="contained" sx={{ mt: 2, mr:2, borderRadius: 0 }} onClick={() => window.location.href = '/'}>
         Back to Home
       </Button>
     </Container>
