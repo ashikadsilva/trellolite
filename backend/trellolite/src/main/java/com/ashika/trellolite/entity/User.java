@@ -29,5 +29,9 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Lob
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
     private String password;
 }
