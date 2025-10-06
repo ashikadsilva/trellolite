@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import { showToast } from '../utils/toast';
 import { AuthContext } from './context/AuthProvider';
+import UserAvatar from './profilePicture/UserAvatar';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -16,15 +17,6 @@ const Header = () => {
         redirectUri: window.location.origin
       });
     }, 500);
-  };
-
-  const getInitials = (name) => {
-    if (!name) return '?';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -69,18 +61,11 @@ const Header = () => {
 
           <ThemeToggle />
 
-          <Avatar 
-            sx={{ 
-              bgcolor: 'secondary.main', 
-              cursor: 'pointer',
-              width: 36,
-              height: 36,
-              fontSize: '0.9rem',
-            }}
+          <UserAvatar 
+            user={user}
+            size={36}
             onClick={() => navigate('/profile')}
-          >
-            {getInitials(user?.name)}
-          </Avatar>
+          />
 
           <Button 
             color="inherit" 

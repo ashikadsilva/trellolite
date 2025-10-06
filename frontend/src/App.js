@@ -18,18 +18,6 @@ function App() {
     );
   }
 
-const handleLogout = () => {
-  if (!keycloakAuth) return;
-  keycloakAuth.logout();
-=======
-  showToast.info('Logging out...');
-  setTimeout (() => {
-    keycloakAuth.logout({
-      redirectUri: window.location.origin
-    });
-  }, 500);
-};
-
   const testBackendConnection = async () => {
     setTesting(500)
     try {
@@ -86,7 +74,6 @@ const handleLogout = () => {
           sx={{ mr: 2 }}>
           Admin Dashboard
         </Button>
-=======
       <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Card>
