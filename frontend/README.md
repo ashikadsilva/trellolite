@@ -2,6 +2,8 @@
 
 React app with **Keycloak login** and calls to the Spring Boot backend.
 
+Keycloak Authenticated
+
 ---
 
 ## Setup
