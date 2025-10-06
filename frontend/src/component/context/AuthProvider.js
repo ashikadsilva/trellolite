@@ -14,14 +14,17 @@ const AuthProvider = ({ children }) => {
   const refreshProfile = async () => {
     try {
       const response = await api.get("/auth/user/profile-info");
+      const profileData = response.data;
       setUser(prev => ({
         ...prev,
-        ...response.data,
+        ...profileData,
+        avatar: profileData.profilePicture || prev.avatar || null,
       }));
     } catch (err) {
       console.error("Failed to refresh profile", err);
     }
   };
+
 
   const hasRole = (role) => user?.roles?.includes(role);
 
@@ -46,6 +49,7 @@ const AuthProvider = ({ children }) => {
             name: tokenParsed?.name || tokenParsed?.preferred_username,
             email: tokenParsed?.email,
             roles: tokenParsed?.realm_access?.roles || [],
+            avatar: null, // Initialize avatar as null, will be loaded from DB
           });
 
           // Merge DB values (authoritative)
@@ -84,7 +88,7 @@ const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, authenticated, refreshProfile, hasRole, keycloakAuth }}>
+    <AuthContext.Provider value={{ user, setUser, authenticated, refreshProfile, hasRole, keycloakAuth }}>
       {children}
     </AuthContext.Provider>
   );
