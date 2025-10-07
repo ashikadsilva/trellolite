@@ -56,7 +56,7 @@ const AvatarUpload = ({ user, onAvatarUpdate }) => {
     setUploading(true);
     try {
       await api.delete('/auth/user/avatar');
-      showToast.success('Avatar deleted successfully');
+      showToast.error('Avatar deleted successfully');
       onAvatarUpdate(null);
       setPreviewOpen(false);
     } catch (error) {
@@ -91,6 +91,7 @@ const AvatarUpload = ({ user, onAvatarUpdate }) => {
 
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
+            sx={{ mt: 2, mr: 2, borderRadius: 0 }}
             variant="contained"
             component="label"
             startIcon={<PhotoCamera />}

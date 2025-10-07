@@ -40,7 +40,7 @@ const ProfilePage = () => {
         };
 
         fetchProfile();
-    }, [user]); // trigger re-fetch when AuthContext.user changes
+    }, []); // trigger re-fetch when AuthContext.user changes
 
 
     const handleAvatarUpdate = (newAvatar) => {
