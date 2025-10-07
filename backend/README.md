@@ -6,9 +6,13 @@ A simple full-stack project with **Spring Boot backend** and **React frontend**,
 
 ## Project Structure
 trellolite/
+
 │
+
 ├─ backend/ # Spring Boot REST API (Keycloak-secured)
+
 ├─ frontend/ # React app (Keycloak login + API calls)
+
 └─ README.md # Project overview
 
 

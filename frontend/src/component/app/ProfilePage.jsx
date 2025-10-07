@@ -109,6 +109,18 @@ const ProfilePage = () => {
         </Container>
     );
 
+    if (error && !profile) return (
+        <Container sx={{ mt: 4 }}>
+            <Alert severity="error">{error}</Alert>
+            <Button
+                variant='contained'
+                sx={{ mt: 2 }}
+                onClick={() => window.location.reload()}>
+                Retry
+            </Button>
+        </Container>
+    )
+
     return (
         <>
             <Header />

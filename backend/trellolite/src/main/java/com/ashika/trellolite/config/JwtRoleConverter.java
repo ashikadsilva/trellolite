@@ -6,30 +6,30 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 
+import javax.swing.text.html.Option;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Configuration
 public class JwtRoleConverter {
 
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter(){
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+            if (realmAccess == null) return Collections.emptyList();
 
-        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-        jwtConverter.setJwtGrantedAuthoritiesConverter((Jwt jwt) -> {
-            Object rolesObj = jwt.getClaim("realm_access") != null
-                    ? ((java.util.Map<String, Object>) jwt.getClaim("realm_access")).get("roles")
-                    : null;
+            List<String> roles = (List<String>) realmAccess.get("roles");
+            if (roles == null) return Collections.emptyList();
 
-            if (rolesObj instanceof List) {
-                List<String> roles = (List<String>) rolesObj;
-                return roles.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                        .collect(Collectors.toList());
-            }
-            return List.of();
+            return roles.stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+                    .collect(Collectors.toList());
         });
-
-        return jwtConverter;
+        return converter;
     }
 }
