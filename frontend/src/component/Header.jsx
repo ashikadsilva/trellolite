@@ -22,56 +22,46 @@ const Header = () => {
   return (
     <AppBar position="static" elevation={2}>
       <Toolbar>
-        <Typography 
-          variant="h6" 
-          component="div" 
-          sx={{ 
-            flexGrow: 1, 
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{
+            flexGrow: 1,
             cursor: 'pointer',
             fontWeight: 700,
           }}
-          onClick={() => navigate('/')}
-        >
+          onClick={() => navigate('/')}>
           🚀 TrelloLite
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button 
-            color="inherit" 
-            onClick={() => navigate('/')}
-          >
+          <Button color="inherit" onClick={() => navigate('/')}>
             Home
           </Button>
-          
-          <Button 
-            color="inherit" 
-            onClick={() => navigate('/profile')}
-          >
+
+          <Button color="inherit" onClick={() => navigate('/profile')}>
             Profile
           </Button>
 
+          <Button color="inherit" onClick={() => navigate('/boards')}>
+            Boards
+          </Button>
+
           {user?.roles?.includes('admin') && (
-            <Button 
-              color="inherit" 
-              onClick={() => navigate('/admin')}
-            >
+            <Button color="inherit" onClick={() => navigate('/admin')}>
               Admin
             </Button>
           )}
-
+          
           <ThemeToggle />
 
-          <UserAvatar 
-            user={user}
-            size={36}
-            onClick={() => navigate('/profile')}
-          />
+          <UserAvatar user={user} size={36} onClick={() => navigate('/profile')}/>
 
-          <Button 
-            color="inherit" 
+          <Button
+            color="inherit"
             variant="outlined"
             onClick={handleLogout}
-            sx={{ 
+            sx={{
               borderColor: 'rgba(255, 255, 255, 0.5)',
               '&:hover': {
                 borderColor: 'white',
