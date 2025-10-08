@@ -41,6 +41,7 @@ export const CardAPI = {
   createCard: (data) => api.post(`/api/cards`, data),
   updateCard: (id, data) => api.put(`/api/cards/${id}`, data),
   deleteCard: (id) => api.delete(`/api/cards/${id}`),
+  reorderCards: (data) => api.put(`/api/cards/reorder`, data),
 };
 
 export default api;
