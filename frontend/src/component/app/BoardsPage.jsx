@@ -3,14 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { BoardAPI } from "../services/api";
 import { BoardContext } from "../context/BoardContext";
 import { Container, Card, CardContent, Typography, Grid } from "@mui/material";
+import { AuthContext } from "../context/AuthProvider";
 
 const BoardsPage = () => {
   const { boards, setBoards, setCurrentBoard } = useContext(BoardContext);
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+
 
   useEffect(() => {
-    BoardAPI.getBoards(1).then(res => setBoards(res.data));
-  }, [setBoards]);
+    if (!user) return;
+    BoardAPI.getBoards(user.userId).then(res => setBoards(res.data));
+  }, [user,setBoards]);
 
   const openBoard = (board) => {
     setCurrentBoard(board);
