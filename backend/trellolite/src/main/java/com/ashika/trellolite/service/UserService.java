@@ -55,6 +55,7 @@ public class UserService {
     // Map entity -> DTO
     private UserVo mapToDto(User user) {
         return UserVo.builder()
+                .userId(String.valueOf(user.getId()))
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
