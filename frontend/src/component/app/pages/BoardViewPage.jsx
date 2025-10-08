@@ -21,7 +21,8 @@ const BoardViewPage = () => {
   const [editingList, setEditingList] = useState(null);
   const [newListName, setNewListName] = useState("");
   const [editingCardId, setEditingCardId] = useState(null);
-  const [newCardTitle, setNewCardTitle] = useState("");
+  const [newCardTitles, setNewCardTitles] = useState({});
+  const [editingCardTitles, setEditingCardTitles] = useState({});
 
   useEffect(() => {
     ListAPI.getLists(id).then(res => {
@@ -34,30 +35,40 @@ const BoardViewPage = () => {
     });
   }, [id, setLists, setCards]);
 
-  const onDragEnd = (result) => {
-    const { source, destination, draggableId, type } = result;
+  const onDragEnd = async (result) => {
+    const { source, destination, draggableId } = result;
     if (!destination) return;
 
-    if (type === "card") {
-      const sourceListId = source.droppableId;
-      const destListId = destination.droppableId;
-      const sourceCards = [...cards[sourceListId]];
-      const [movedCard] = sourceCards.splice(source.index, 1);
+    const sourceListId = source.droppableId;
+    const destListId = destination.droppableId;
 
-      if (sourceListId === destListId) {
-        sourceCards.splice(destination.index, 0, movedCard);
-        setCards(prev => ({ ...prev, [sourceListId]: sourceCards }));
-      } else {
-        const destCards = [...(cards[destListId] || [])];
-        destCards.splice(destination.index, 0, movedCard);
-        setCards(prev => ({
-          ...prev,
-          [sourceListId]: sourceCards,
-          [destListId]: destCards
-        }));
-      }
+    const updatedSource = [...(cards[sourceListId] || [])];
+    const [movedCard] = updatedSource.splice(source.index, 1);
 
-      CardAPI.updateCard(draggableId, { listId: destListId });
+    if (sourceListId === destListId) {
+      updatedSource.splice(destination.index, 0, movedCard);
+      setCards(prev => ({ ...prev, [sourceListId]: updatedSource }));
+    } else {
+      const updatedDest = [...(cards[destListId] || [])];
+      movedCard.listId = parseInt(destListId);
+      updatedDest.splice(destination.index, 0, movedCard);
+
+      setCards(prev => ({
+        ...prev,
+        [sourceListId]: updatedSource,
+        [destListId]: updatedDest,
+      }));
+    }
+
+    try {
+      const payload = [
+        ...(cards[sourceListId]?.map((c, index) => ({ ...c, position: index })) || []),
+        ...(cards[destListId]?.map((c, index) => ({ ...c, position: index })) || []),
+      ];
+      await CardAPI.reorderCards(payload);
+      await CardAPI.updateCard(draggableId, { listId: destListId });
+    } catch {
+      showToast.error("Failed to save card reorder");
     }
   };
 
@@ -99,14 +110,15 @@ const BoardViewPage = () => {
   };
 
   const handleAddCard = async (listId) => {
-    if (!newCardTitle.trim()) return;
+    const title = newCardTitles[listId]?.trim();
+    if (!title) return;
     try {
-      const res = await CardAPI.createCard({ title: newCardTitle, listId });
+      const res = await CardAPI.createCard({ title, listId });
       setCards(prev => ({
         ...prev,
         [listId]: [...(prev[listId] || []), res.data]
       }));
-      setNewCardTitle("");
+      setNewCardTitles(prev => ({ ...prev, [listId]: "" }));
       showToast.success("Card added");
     } catch {
       showToast.error("Failed to add card");
@@ -115,35 +127,77 @@ const BoardViewPage = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Board {id}</Typography>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+        Board {id}
+      </Typography>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start", overflowX: "auto" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "flex-start",
+            overflowX: "auto",
+            pb: 2
+          }}
+        >
           {lists.map(list => (
             <Droppable droppableId={list.id.toString()} key={list.id} type="card">
               {(provided) => (
                 <Paper
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  sx={{ width: 250, p: 2, minHeight: 200 }}
+                  sx={{
+                    width: 280,
+                    p: 2,
+                    minHeight: 250,
+                    bgcolor: "#f4f5f7",
+                    borderRadius: 2,
+                    boxShadow: 3,
+                    display: "flex",
+                    flexDirection: "column"
+                  }}
                 >
                   {/* List header */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mb: 1
+                    }}
+                  >
                     {editingList === list.id ? (
                       <>
                         <TextField
                           value={list.name}
-                          onChange={(e) => setLists(prev => prev.map(l => l.id === list.id ? { ...l, name: e.target.value } : l))}
+                          onChange={(e) =>
+                            setLists(prev =>
+                              prev.map(l => l.id === list.id ? { ...l, name: e.target.value } : l)
+                            )
+                          }
                           size="small"
+                          sx={{ flexGrow: 1 }}
                         />
-                        <Button onClick={() => handleListNameSave(list)}>Save</Button>
+                        <Button size="small" onClick={() => handleListNameSave(list)}>Save</Button>
                       </>
                     ) : (
                       <>
                         <Typography variant="h6">{list.name}</Typography>
                         <Box>
-                          <Button onClick={() => setEditingList(list.id)} size="small">Edit</Button>
-                          <IconButton onClick={() => handleDeleteList(list.id)} size="small"><Delete /></IconButton>
+                          <Button
+                            size="small"
+                            onClick={() => setEditingList(list.id)}
+                            sx={{ mr: 0.5 }}
+                          >
+                            Edit
+                          </Button>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteList(list.id)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
                         </Box>
                       </>
                     )}
@@ -152,30 +206,49 @@ const BoardViewPage = () => {
                   {/* Cards */}
                   {cards[list.id]?.map((card, index) => (
                     <Draggable draggableId={card.id.toString()} index={index} key={card.id}>
-                      {(provided) => (
+                      {(provided, snapshot) => (
                         <Paper
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          sx={{ mt: 1, p: 1, bgcolor: "#eee" }}
+                          sx={{
+                            mt: 1,
+                            p: 1,
+                            bgcolor: snapshot.isDragging ? "#d0f0fd" : "#fff",
+                            borderRadius: 1,
+                            boxShadow: snapshot.isDragging ? 4 : 1,
+                            cursor: "pointer",
+                            transition: "0.2s",
+                          }}
                         >
                           {editingCardId === card.id ? (
                             <Box sx={{ display: "flex", gap: 1 }}>
                               <TextField
-                                value={card.title}
+                                value={editingCardTitles[card.id] ?? card.title}
                                 onChange={(e) =>
-                                  setCards(prev => ({
-                                    ...prev,
-                                    [list.id]: prev[list.id].map(c => c.id === card.id ? { ...c, title: e.target.value } : c)
-                                  }))
+                                  setEditingCardTitles(prev => ({ ...prev, [card.id]: e.target.value }))
                                 }
                                 size="small"
+                                fullWidth
                               />
                               <Button
+                                size="small"
                                 onClick={async () => {
                                   try {
-                                    await CardAPI.updateCard(card.id, { title: card.title });
+                                    const newTitle = editingCardTitles[card.id];
+                                    await CardAPI.updateCard(card.id, { title: newTitle });
+                                    setCards(prev => ({
+                                      ...prev,
+                                      [list.id]: prev[list.id].map(c =>
+                                        c.id === card.id ? { ...c, title: newTitle } : c
+                                      )
+                                    }));
                                     setEditingCardId(null);
+                                    setEditingCardTitles(prev => {
+                                      const copy = { ...prev };
+                                      delete copy[card.id];
+                                      return copy;
+                                    });
                                     showToast.success("Card Updated");
                                   } catch {
                                     showToast.error("Failed to update card");
@@ -187,7 +260,7 @@ const BoardViewPage = () => {
                             </Box>
                           ) : (
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <Typography>{card.title}</Typography>
+                              <Typography sx={{ wordBreak: "break-word" }}>{card.title}</Typography>
                               <Box>
                                 <Button size="small" onClick={() => setEditingCardId(card.id)}>Edit</Button>
                                 <IconButton
@@ -221,14 +294,16 @@ const BoardViewPage = () => {
                     <TextField
                       size="small"
                       placeholder="New Card"
-                      value={newCardTitle}
-                      onChange={(e) => setNewCardTitle(e.target.value)}
+                      value={newCardTitles[list.id] || ""}
+                      onChange={(e) => setNewCardTitles(prev => ({ ...prev, [list.id]: e.target.value }))}
                       fullWidth
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
                     />
                     <Button
                       variant="contained"
                       size="small"
-                      sx={{ mt: 1 }}
+                      fullWidth
+                      sx={{ mt: 1, borderRadius: 1 }}
                       onClick={() => handleAddCard(list.id)}
                     >
                       Add Card
@@ -240,14 +315,37 @@ const BoardViewPage = () => {
           ))}
 
           {/* Add New List */}
-          <Paper sx={{ width: 250, p: 2, minHeight: 200, display: "flex", flexDirection: "column", gap: 1 }}>
+          <Paper
+            sx={{
+              width: 280,
+              p: 2,
+              minHeight: 250,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              bgcolor: "#f4f5f7",
+              borderRadius: 2,
+              boxShadow: 3,
+              flexShrink: 0
+            }}
+          >
             <TextField
               placeholder="New List Name"
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
               size="small"
+              fullWidth
+              sx={{ bgcolor: "#fff", borderRadius: 1 }}
             />
-            <Button variant="contained" onClick={handleAddList}>Add List</Button>
+            <Button
+              variant="contained"
+              size="small"
+              fullWidth
+              sx={{ mt: 1, borderRadius: 1 }}
+              onClick={handleAddList}
+            >
+              Add List
+            </Button>
           </Paper>
         </Box>
       </DragDropContext>
