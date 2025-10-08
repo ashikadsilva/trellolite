@@ -32,4 +32,9 @@ public class CardController {
     public void deleteCard(@PathVariable Long id) {
         cardService.deleteCard(id);
     }
+
+    @PutMapping("/reorder")
+    public void reorderCards(@RequestBody List<Card> updatedCards) {
+        cardService.reorderCards(updatedCards);
+    }
 }

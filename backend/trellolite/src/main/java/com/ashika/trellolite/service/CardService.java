@@ -2,6 +2,7 @@ package com.ashika.trellolite.service;
 
 import com.ashika.trellolite.entity.Card;
 import com.ashika.trellolite.repository.CardRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +29,15 @@ public class CardService {
 
     public void deleteCard(Long id) {
         cardRepo.deleteById(id);
+    }
+
+    @Transactional
+    public void reorderCards(List<Card> updatedCards) {
+        for (Card updated : updatedCards) {
+            Card existing = cardRepo.findById(updated.getId()).orElseThrow();
+            existing.setListId(updated.getListId());
+            existing.setPosition(updated.getPosition());
+            cardRepo.save(existing);
+        }
     }
 }
