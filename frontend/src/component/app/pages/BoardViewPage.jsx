@@ -146,8 +146,7 @@ const BoardViewPage = () => {
           sx={{
             display: "flex",
             gap: 2,
-            alignItems: "flex-start",            
-            paddingBottom: "99px !important",
+            alignItems: "flex-start",
             overflowX: "auto",
             pb: 2,
             "&::-webkit-scrollbar": {
