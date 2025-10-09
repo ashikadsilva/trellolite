@@ -12,7 +12,7 @@ import {
   IconButton
 } from "@mui/material";
 import { showToast } from "../../../utils/toast";
-import { Delete } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const BoardViewPage = () => {
@@ -91,7 +91,7 @@ const BoardViewPage = () => {
         delete copy[listId];
         return copy;
       });
-      showToast.info("List deleted");
+      showToast.success("List deleted");
     } catch {
       showToast.error("Failed to delete list");
     }
@@ -126,8 +126,17 @@ const BoardViewPage = () => {
   };
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+    <Container
+      maxWidth={false}
+      disableGutters
+      sx={{
+        mt: 2,
+        p: 3,
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
+      }}
+    >
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: "#fff" }}>
         Board {id}
       </Typography>
 
@@ -138,7 +147,19 @@ const BoardViewPage = () => {
             gap: 2,
             alignItems: "flex-start",
             overflowX: "auto",
-            pb: 2
+            pb: 2,
+            "&::-webkit-scrollbar": {
+              height: 8,
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "rgba(255,255,255,0.5)",
+              borderRadius: 4,
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: "rgba(255,255,255,0.8)",
+            },
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(255,255,255,0.5) transparent",
           }}
         >
           {lists.map(list => (
@@ -152,10 +173,11 @@ const BoardViewPage = () => {
                     p: 2,
                     minHeight: 250,
                     bgcolor: "#f4f5f7",
-                    borderRadius: 2,
-                    boxShadow: 3,
+                    borderRadius: 3,
+                    boxShadow: 4,
                     display: "flex",
-                    flexDirection: "column"
+                    flexDirection: "column",
+                    flexShrink: 0,
                   }}
                 >
                   {/* List header */}
@@ -164,7 +186,10 @@ const BoardViewPage = () => {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      mb: 1
+                      mb: 1,
+                      p: 1,
+                      bgcolor: "#eceff1",
+                      borderRadius: 2,
                     }}
                   >
                     {editingList === list.id ? (
@@ -177,21 +202,20 @@ const BoardViewPage = () => {
                             )
                           }
                           size="small"
-                          sx={{ flexGrow: 1 }}
+                          sx={{ flexGrow: 1, bgcolor: "#fff", borderRadius: 1 }}
                         />
                         <Button size="small" onClick={() => handleListNameSave(list)}>Save</Button>
                       </>
                     ) : (
                       <>
-                        <Typography variant="h6">{list.name}</Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>{list.name}</Typography>
                         <Box>
-                          <Button
+                          <IconButton
                             size="small"
                             onClick={() => setEditingList(list.id)}
-                            sx={{ mr: 0.5 }}
                           >
-                            Edit
-                          </Button>
+                            <Edit fontSize="small" />
+                          </IconButton>
                           <IconButton
                             size="small"
                             onClick={() => handleDeleteList(list.id)}
@@ -213,12 +237,14 @@ const BoardViewPage = () => {
                           {...provided.dragHandleProps}
                           sx={{
                             mt: 1,
-                            p: 1,
-                            bgcolor: snapshot.isDragging ? "#d0f0fd" : "#fff",
-                            borderRadius: 1,
-                            boxShadow: snapshot.isDragging ? 4 : 1,
-                            cursor: "pointer",
-                            transition: "0.2s",
+                            p: 1.5,
+                            bgcolor: snapshot.isDragging ? "#e3f2fd" : "#fff",
+                            borderRadius: 2,
+                            boxShadow: snapshot.isDragging ? 6 : 2,
+                            cursor: "grab",
+                            transition: "all 0.2s ease",
+                            position: "relative",
+                            "&:hover": { transform: "translateY(-2px)", boxShadow: 4 },
                           }}
                         >
                           {editingCardId === card.id ? (
@@ -233,6 +259,7 @@ const BoardViewPage = () => {
                               />
                               <Button
                                 size="small"
+                                variant="contained"
                                 onClick={async () => {
                                   try {
                                     const newTitle = editingCardTitles[card.id];
@@ -259,12 +286,33 @@ const BoardViewPage = () => {
                               </Button>
                             </Box>
                           ) : (
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <Typography sx={{ wordBreak: "break-word" }}>{card.title}</Typography>
-                              <Box>
-                                <Button size="small" onClick={() => setEditingCardId(card.id)}>Edit</Button>
+                            <>
+                              <Typography sx={{ wordBreak: "break-word" }}>
+                                {card.title}
+                              </Typography>
+                              {/* Hover-only actions */}
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: 4,
+                                  right: 4,
+                                  display: "flex",
+                                  gap: 1,
+                                  opacity: 0,
+                                  transition: "opacity 0.2s",
+                                  "&:hover": { opacity: 1 },
+                                }}
+                                className="card-actions"
+                              >
                                 <IconButton
                                   size="small"
+                                  onClick={() => setEditingCardId(card.id)}
+                                >
+                                  <Edit fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                  size="small"
+                                  color="error"
                                   onClick={async () => {
                                     try {
                                       await CardAPI.deleteCard(card.id);
@@ -281,7 +329,7 @@ const BoardViewPage = () => {
                                   <Delete fontSize="small" />
                                 </IconButton>
                               </Box>
-                            </Box>
+                            </>
                           )}
                         </Paper>
                       )}
@@ -297,16 +345,16 @@ const BoardViewPage = () => {
                       value={newCardTitles[list.id] || ""}
                       onChange={(e) => setNewCardTitles(prev => ({ ...prev, [list.id]: e.target.value }))}
                       fullWidth
-                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
+                      sx={{ bgcolor: "#fff", borderRadius: 2 }}
                     />
                     <Button
                       variant="contained"
                       size="small"
                       fullWidth
-                      sx={{ mt: 1, borderRadius: 1 }}
+                      sx={{ mt: 1, borderRadius: 2 }}
                       onClick={() => handleAddCard(list.id)}
                     >
-                      Add Card
+                      + Add Card
                     </Button>
                   </Box>
                 </Paper>
@@ -324,8 +372,8 @@ const BoardViewPage = () => {
               flexDirection: "column",
               gap: 1,
               bgcolor: "#f4f5f7",
-              borderRadius: 2,
-              boxShadow: 3,
+              borderRadius: 3,
+              boxShadow: 4,
               flexShrink: 0
             }}
           >
@@ -335,16 +383,16 @@ const BoardViewPage = () => {
               onChange={(e) => setNewListName(e.target.value)}
               size="small"
               fullWidth
-              sx={{ bgcolor: "#fff", borderRadius: 1 }}
+              sx={{ bgcolor: "#fff", borderRadius: 2 }}
             />
             <Button
               variant="contained"
               size="small"
               fullWidth
-              sx={{ mt: 1, borderRadius: 1 }}
+              sx={{ mt: 1, borderRadius: 2 }}
               onClick={handleAddList}
             >
-              Add List
+              + Add List
             </Button>
           </Paper>
         </Box>
