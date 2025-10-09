@@ -91,7 +91,7 @@ const BoardViewPage = () => {
         delete copy[listId];
         return copy;
       });
-      showToast.info("List deleted");
+      showToast.success("List deleted");
     } catch {
       showToast.error("Failed to delete list");
     }
