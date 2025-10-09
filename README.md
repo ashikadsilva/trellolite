@@ -51,3 +51,5 @@ User sees personalized data
 
 ![Trellolite FlowDiagram](images/flow-diagram.png)
 
+Navigate through menus
+
