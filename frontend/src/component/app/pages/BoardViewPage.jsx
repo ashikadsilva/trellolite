@@ -134,6 +134,7 @@ const BoardViewPage = () => {
         p: 3,
         minHeight: "100vh",
         background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
+        marginTop:"0px"
       }}
     >
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: "#fff" }}>
@@ -145,7 +146,8 @@ const BoardViewPage = () => {
           sx={{
             display: "flex",
             gap: 2,
-            alignItems: "flex-start",
+            alignItems: "flex-start",            
+            paddingBottom: "99px !important",
             overflowX: "auto",
             pb: 2,
             "&::-webkit-scrollbar": {
